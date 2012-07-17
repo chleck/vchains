@@ -1,0 +1,18 @@
+{
+  "author": "Dmitry Chleck <dmitrychleck[at]gmail.com>",
+  "name": "vchains",
+  "description": "Chaining validators for javascript",
+  "version": "0.0.1",
+  "homepage": "https://github.com/chleck/vchains",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/chleck/vchains.git"
+  },
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}
