@@ -1,4 +1,4 @@
-﻿vchains = require('./vchains.js');
+﻿vchains = require('./index.js');
 validate = vchains.validate;
 
 // Add new global validation method to library
@@ -23,3 +23,7 @@ console.log(
 );
 console.log(validate('4276-8010-1016-5090').test1().test3('Value can be undefined ->').isCard('It\'s not credit card number!').error('Credit card number is valid.'));
 console.log(validate('4275-8010-1016-5090').isCard('It\'s not credit card number!').error());
+
+validate('123a').onError(function(err){
+  console.log(err);
+}).isNum('Not numeric string!');

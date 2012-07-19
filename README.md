@@ -44,3 +44,12 @@ Register new validation method globally
     console.log(
         validate('Hello, world!').globalTest().error()
     ); // Will print "Value contains space!"
+
+Use callback for error handling
+-------------------------------
+
+    validate = require('./vchains.js').validate;
+    validate('123a').onError(function(err){
+      console.log(err);
+    }).isNum('Not numeric string!'); // Will print "Not numeric string!"
+
