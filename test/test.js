@@ -1,4 +1,4 @@
-﻿vchains = require('./index.js');
+﻿vchains = require('../index.js');
 validate = vchains.validate;
 
 // Add new global validation method to library
