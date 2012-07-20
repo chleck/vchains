@@ -8,17 +8,17 @@
 ## Usage
 
 ```javascript
-validate = require('./vchains.js').validate;
+validate = require('vchains').validate;
 
 console.log(
   validate('4276-8010-XXXX-5090').isCard('It is not credit card number!').error('Credit card number is valid.')
-);
+); // Will print "Credit card number is valid."
 ```
 
 ## Register new validation method
 
 ```javascript
-validate = require('./vchains.js').validate;
+validate = require('vchains').validate;
 
 console.log(
   validate('My string').use('localTest', function(c, msg){
@@ -35,7 +35,7 @@ If you want to extend validator class, you need to
 ### Single method of a library function
 
 ```javascript
-vchains = require('./vchains.js');
+vchains = require('vchains');
 validate = vchains.validate;
 
 vchains.use('globalTest': function(msg){
@@ -50,7 +50,7 @@ console.log(
 ### Multiple methods of a library function
 
 ```javascript
-vchains = require('./vchains.js');
+vchains = require('vchains');
 validate = vchains.validate;
 
 vchains.use({
@@ -72,7 +72,7 @@ console.log(
 ### Single method of a validator instance
 
 ```javascript
-validate = require('./vchains.js').validate;
+validate = require('vchains').validate;
 
 console.log(
   validate('My string').use('localTest', function(c, msg){
@@ -86,7 +86,7 @@ console.log(
 ## Use callback for error handling
 
 ```javascript
-validate = require('./vchains.js').validate;
+validate = require('vchains').validate;
 validate('123a').onError(function(err){
   console.log(err);
 }).isNum('Not numeric string!'); // Will print "Not numeric string!"
