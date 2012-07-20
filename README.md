@@ -38,7 +38,7 @@ If you want to extend validator class, you need to
 vchains = require('vchains');
 validate = vchains.validate;
 
-vchains.use('globalTest': function(msg){
+vchains.use('globalTest', function(msg){
   if(this.value.indexOf(' ') >= 0) return msg || 'Value contains space!';
 });
 
@@ -64,9 +64,8 @@ vchains.use({
 
 console.log(
   validate('Hello, world! #1').globalTest1().error(),
-  ', ',
   validate('Hello, world! #2').globalTest2().error()
-); // Will print "Value contains space!, Value contains "#"!"
+); // Will print "Value contains space! Value contains "#"!"
 ```
 
 ### Single method of a validator instance
@@ -78,9 +77,8 @@ console.log(
   validate('My string').use('localTest', function(c, msg){
     if(this.value.indexOf(c) >= 0) return msg || 'Error in localTest!';
   }, true /* !!! */).localTest('s').error('No error :)'),
-  ', ',
   validate('Other string').localTest('A').error('This string does not contains "A".')
-); // Will print "Error in localTest!, This string does not contains "A"."
+); // Will print "Error in localTest! This string does not contains "A"."
 ```
 
 ## Use callback for error handling
@@ -88,6 +86,6 @@ console.log(
 ```javascript
 validate = require('vchains').validate;
 validate('123a').onError(function(err){
-  console.log(err);
-}).isNum('Not numeric string!'); // Will print "Not numeric string!"
+  if(err) console.log('Validation error:', err); else console.log('No error!');
+}).isNum('Not numeric string!'); // Will print "Validation error: Not numeric string!"
 ```
