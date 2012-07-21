@@ -19,10 +19,10 @@ console.log(
   }).use('test3', function(a, b, msg){
     console.log('Registered locally as globally. You can pass additional parameters to your validator: a="' + a + '", b="' + b + '".');
 //    return msg || 'Error 3!'; // Uncomment to raise error at this point
-  }, true).test1().test2('This is a custom error message.').test3('A value', 'B value').isEmail().invalid('The BIG error!').error()
+  }, true).test1().test2('This is a custom error message.').test3('A value', 'B value').isEmail().invalid('The BIG error!').msg()
 );
-console.log(validate('4276-8010-1016-5090').test1().test3('Value can be undefined ->').isCard('It\'s not credit card number!').error('Credit card number is valid.'));
-console.log(validate('4275-8010-1016-5090').isCard('It\'s not credit card number!').error());
+console.log(validate('4276-8010-1016-5090', 'Credit card number is valid.').test1().test3('Value can be undefined ->').isCard('It\'s not credit card number!').msg());
+console.log(validate('4275-8010-1016-5090').isCard('It\'s not credit card number!').msg());
 
 validate('123a').onError(function(err){
   console.log(err);
