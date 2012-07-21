@@ -17,9 +17,9 @@ console.log(
 
 ## Register new validation methods
 
-If you need custom validation method, your can extend vchains.
+If you need custom validation method, your can extend *vchains*.
 
-Call vchains.use() with your validation method as parameter. After that you can access you method from any validation object instance.
+Call *vchains.use()* with your validation method as parameter. After that you can access you method from any validation object instance.
 
 ### Single method
 
@@ -75,7 +75,7 @@ console.log(
 ); // Will print "Error in localTest!"
 ```
 
-If the second parameter of vchains.use() is 'true' validator will be accessible from any new validation object.
+If the second parameter of *vchains.use()* is 'true' validator will be accessible from any new validation object.
 
 ```javascript
 validate = require('vchains').validate;
