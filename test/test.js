@@ -1,5 +1,3 @@
-require('should');
-
 vchains = require('../index.js');
 validate = vchains.validate;
 
