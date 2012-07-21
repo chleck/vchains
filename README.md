@@ -101,7 +101,7 @@ console.log(
   validate('Short string', 'No error :)').use('parametersTest', function(min, max, msg){
     var l = String(this.value).length;
     if(min > l || l > max) return msg || 'Error in parametersTest!';
-  }).localTest(0, 32).msg(),
+  }).parametersTest(0, 32).msg();
 ); // Will print "Error in parametersTest!"
 ```
 

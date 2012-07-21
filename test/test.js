@@ -1,29 +1,42 @@
-﻿vchains = require('../index.js');
+require('should');
+
+vchains = require('../index.js');
 validate = vchains.validate;
 
-// Add new global validation method to library
-vchains.use({ 'test1': function(msg){
-  console.log('Registered globally.');
-//  return msg || 'Error 1!'; // Uncomment to raise error at this point
-}});
+describe('Test suite for vchains validation library', function(){
 
-console.log(
-  // Create chainable validator object,
-  // add new local validation method to this oject,
-  // call test and test2 validation methods,
-  // raise error by invalid() method,
-  // return error message
-  validate('my@emailcom').use('test2', function(msg){
-    console.log('Registered locally.');
-//    return msg || 'Error 1!'; // Uncomment to raise error at this point
-  }).use('test3', function(a, b, msg){
-    console.log('Registered locally as globally. You can pass additional parameters to your validator: a="' + a + '", b="' + b + '".');
-//    return msg || 'Error 3!'; // Uncomment to raise error at this point
-  }, true).test1().test2('This is a custom error message.').test3('A value', 'B value').isEmail().invalid('The BIG error!').msg()
-);
-console.log(validate('4276-8010-1016-5090', 'Credit card number is valid.').test1().test3('Value can be undefined ->').isCard('It\'s not credit card number!').msg());
-console.log(validate('4275-8010-1016-5090').isCard('It\'s not credit card number!').msg());
+  describe('API:', function(){
 
-validate('123a').onError(function(err){
-  console.log(err);
-}).isNum('Not numeric string!');
+    it('Create validation object', function(){
+      var v = validate();
+    })
+
+    it('Add custom validation method by API call', function(){
+      vchains.use('test', function(msg){
+        if(this.value.length) return msg || 'Error';
+      });
+    })
+
+    it('Use custom validation method added by API call (valid)', function(){
+      validate('').test().msg().should.equal('');
+    })
+
+    it('Use custom validation method added by API call (error)', function(){
+      validate(' ').test().msg().should.equal('Error');
+    })
+
+  })
+
+  describe('Validators:', function(){
+
+    it('isInt() (valid)', function(){
+      validate('123').isInt().msg().should.equal('');
+    })
+
+    it('isInt() (error)', function(){
+      validate('a123').isInt().msg().should.equal('Bad int value');
+    })
+
+  })
+
+});
