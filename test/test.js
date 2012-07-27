@@ -1,29 +1,21 @@
 vchains = require('../index.js');
 validate = vchains.validate;
 
+var v;
+
 describe('Test suite for vchains validation library', function(){
 
-  describe('API:', function(){
+  describe('Base:', function(){
 
     it('Create validation object', function(){
-      var v = validate();
+      v = validate();
     })
 
-    it('Add custom validation method by API call ( test() )', function(){
-      vchains.use('test', function(msg){
-        if(this.value.length) return msg || 'Error';
+    it('Extend validation object', function(){
+      vchains.extend('ext', function(){
+        return 'ext';
       });
-    })
-
-    it('Add multiple custom validation method by API call ( test1() & test2() )', function(){
-      vchains.use({
-        'test1': function(msg){
-          if(this.value.length != 1) return msg || 'Error';
-        },
-        'test2': function(msg){
-          if(this.value.length != 2) return msg || 'Error';
-        }
-      });
+      validate().ext().should.equal('ext');
     })
 
   })
@@ -42,20 +34,51 @@ describe('Test suite for vchains validation library', function(){
 
   describe('Custom validators:', function(){
 
-    it('Use custom validation method added by API call (valid)', function(){
-      validate('').test().msg().should.equal('');
+    it('Add global custom validation method', function(){
+      vchains.use('test0', function(msg){
+        if(this.value.length) return msg || 'Error';
+      });
     })
 
-    it('Use custom validation method added by API call (error)', function(){
-      validate(' ').test().msg().should.equal('Error');
+    it('Use this custom validation method', function(){
+      validate('').test0().msg().should.equal('');
+      validate(' ').test0().msg().should.equal('Error');
     })
 
-    it('Use multiple custom validation method added by API call (valid)', function(){
+    it('Add multiple global custom validation methods', function(){
+      vchains.use({
+        'test1': function(msg){
+          if(this.value.length != 1) return msg || 'Error';
+        },
+        'test2': function(msg){
+          if(this.value.length != 2) return msg || 'Error';
+        }
+      });
+    })
+
+    it('Use these custom validation methods', function(){
       validate('1').test1().msg().should.equal('');
+      validate('1').test2().msg().should.equal('Error');
     })
 
-    it('Use multiple custom validation method added by API call (error)', function(){
-      validate('1').test2().msg().should.equal('Error');
+    it('Add local custom validation method from chain', function(){
+      v = validate('333').use('test3', function(msg){
+        if(this.value.length != 3) return msg || 'Error';
+      });
+    })
+
+    it('Use this custom validation method', function(){
+      v.test3().msg().should.equal('');
+    })
+
+    it('Add global custom validation method from chain', function(){
+      validate('4444').use('test4', function(msg){
+        if(this.value.length != 4) return msg || 'Error';
+      }, true);
+    })
+
+    it('Use this custom validation method', function(){
+      validate('4444').test4().msg().should.equal('');
     })
 
   })
