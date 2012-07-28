@@ -9,6 +9,8 @@ describe('Test suite for vchains validation library', function(){
 
     it('Create validation object', function(){
       v = validate();
+      var t = typeof v;
+      t.should.equal('object');
     })
 
     it('Extend validation object', function(){
@@ -22,11 +24,8 @@ describe('Test suite for vchains validation library', function(){
 
   describe('Validators:', function(){
 
-    it('isInt() (valid)', function(){
+    it('isInt()', function(){
       validate('123').isInt().msg().should.equal('');
-    })
-
-    it('isInt() (error)', function(){
       validate('a123').isInt().msg().should.equal('Bad int value');
     })
 
