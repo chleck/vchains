@@ -2,7 +2,7 @@
   "author": "Dmitry Chleck <dmitrychleck@gmail.com>",
   "name": "vchains",
   "description": "Chaining validators for javascript",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "homepage": "https://github.com/chleck/vchains",
   "repository": {
     "type": "git",
