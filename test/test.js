@@ -29,13 +29,18 @@ describe('Test suite for vchains validation library', function(){
       validate('a123').isInt().msg().should.equal('Bad int value');
     })
 
+    it('is()', function(){
+      validate('asdfgh').is(/^asd/).msg().should.equal('');
+      validate('qasdfgh').is(/^asd/).msg().should.equal('Bad value');
+    })
+
   })
 
   describe('Custom validators:', function(){
 
     it('Add global custom validation method', function(){
-      vchains.use('test0', function(msg){
-        if(this.value.length) return msg || 'Error';
+      vchains.validator('test0', function(msg){
+        if(this.val().length) return msg || 'Error';
       });
     })
 
@@ -45,12 +50,12 @@ describe('Test suite for vchains validation library', function(){
     })
 
     it('Add multiple global custom validation methods', function(){
-      vchains.use({
+      vchains.validator({
         'test1': function(msg){
-          if(this.value.length != 1) return msg || 'Error';
+          if(this.val().length != 1) return msg || 'Error';
         },
         'test2': function(msg){
-          if(this.value.length != 2) return msg || 'Error';
+          if(this.val().length != 2) return msg || 'Error';
         }
       });
     })
@@ -61,8 +66,8 @@ describe('Test suite for vchains validation library', function(){
     })
 
     it('Add local custom validation method from chain', function(){
-      v = validate('333').use('test3', function(msg){
-        if(this.value.length != 3) return msg || 'Error';
+      v = validate('333').validator('test3', function(msg){
+        if(this.val().length != 3) return msg || 'Error';
       });
     })
 
@@ -71,8 +76,8 @@ describe('Test suite for vchains validation library', function(){
     })
 
     it('Add global custom validation method from chain', function(){
-      validate('4444').use('test4', function(msg){
-        if(this.value.length != 4) return msg || 'Error';
+      validate('4444').validator('test4', function(msg){
+        if(this.val().length != 4) return msg || 'Error';
       }, true);
     })
 
