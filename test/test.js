@@ -160,9 +160,19 @@ describe('Test suite for vchains validation library', function(){
       create('qasdfgh').is(/^asd/, bad).msg().should.equal(bad);
     })
 
-    it('isNot()', function(){
-      create('qasdfgh', good).isNot(/^asd/).msg().should.equal(good);
-      create('asdfgh').isNot(/^asd/, bad).msg().should.equal(bad);
+    it('not()', function(){
+      create('qasdfgh', good).not(/^asd/).msg().should.equal(good);
+      create('asdfgh').not(/^asd/, bad).msg().should.equal(bad);
+    })
+
+    it('isEmpty()', function(){
+      create('', good).isEmpty().msg().should.equal(good);
+      create('asd').isEmpty(bad).msg().should.equal(bad);
+    })
+
+    it('notEmpty()', function(){
+      create('asd', good).notEmpty().msg().should.equal(good);
+      create('').notEmpty(bad).msg().should.equal(bad);
     })
 
     it('isEmail()', function(){
@@ -240,9 +250,9 @@ describe('Test suite for vchains validation library', function(){
       create('z').isIn([ 'a', 'b', 'c' ], bad).msg().should.equal(bad);
     })
 
-    it('isNotIn()', function(){
-      create('z', good).isNotIn([ 'a', 'b', 'c' ]).msg().should.equal(good);
-      create('a').isNotIn([ 'a', 'b', 'c' ], bad).msg().should.equal(bad);
+    it('notIn()', function(){
+      create('z', good).notIn([ 'a', 'b', 'c' ]).msg().should.equal(good);
+      create('a').notIn([ 'a', 'b', 'c' ], bad).msg().should.equal(bad);
     })
 
     it('isCard()', function(){
