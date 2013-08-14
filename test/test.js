@@ -268,6 +268,14 @@ describe('Test suite for vchains validation library', function(){
       create(' a ').trim().val().should.equal('a');
     })
 
+    it('entityEncode()', function(){
+      create('&>').entityEncode().val().should.equal('&amp;&gt;');
+    })
+
+    it('entityDecode()', function(){
+      create('&amp;&gt;').entityDecode().val().should.equal('&>');
+    })
+
   })
 
 /*  describe('Custom validators:', function(){
