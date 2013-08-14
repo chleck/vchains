@@ -1,5 +1,5 @@
 vchains = require('../index.js');
-validate = vchains.validate;
+create = vchains.create;
 
 var v
   , good  = 'good' // Success message for validators tests
@@ -8,18 +8,143 @@ var v
 
 describe('Test suite for vchains validation library', function(){
 
-  describe('Base:', function(){
+  describe('Library functions:', function(){
 
-    it('Create validation object', function(){
-      v = validate();
+    it('create() - create validation object', function(){
+      v = create();
       (typeof v).should.equal('object');
     })
 
-    it('Extend validation object', function(){
-      vchains.extend('myMethod', function(){
+    it('extend() - add custom method', function(){
+      vchains.extend('myGlobalMethod', function(){
         return 'Me!';
       });
-      validate().myMethod().should.equal('Me!');
+      create().myGlobalMethod().should.equal('Me!');
+    })
+
+    it('cleaner() - add custom cleaning method', function(){
+      vchains.cleaner('myGlobalCleaner', function(n){
+        return this._value.slice(n, -n);
+      });
+      create('asdf').myGlobalCleaner(1).val().should.equal('sd');
+    })
+
+    it('cleaner() - add multiple custom cleaning method', function(){
+      vchains.cleaner({
+        myGlobalCleaner1: function(){ return this._value[0]; },
+        myGlobalCleaner2: function(){ return this._value[1]; }
+      });
+      create('asdf').myGlobalCleaner1().val().should.equal('a');
+      create('asdf').myGlobalCleaner2().val().should.equal('s');
+    })
+
+    it('validator() - add custom validation method', function(){
+      vchains.validator('myGlobalValidator', function(value, msg){
+        if(this.val() !== value) return msg || 'myGlobalValidator: Oops!';
+      });
+      create(1, good).myGlobalValidator(1).msg().should.equal(good);
+    })
+
+    it('validator() - add multiple custom validation methods', function(){
+      vchains.validator({
+        myGlobalValidator1: function(msg){ if(this.val() !== 1) return msg || 'myGlobalValidator1: Oops!'; },
+        myGlobalValidator2: function(msg){ if(this.val() !== 2) return msg || 'myGlobalValidator2: Oops!'; }
+      });
+      create(1, good).myGlobalValidator1().msg().should.equal(good);
+      create(1).myGlobalValidator2(bad).msg().should.equal(bad);
+    })
+
+  })
+
+  describe('vChain methods:', function(){
+
+    it('inline() - apply given function to this chain', function(){
+      create('asdf')
+        .inline(function(){
+          return this._value[0];
+        })
+        .should.equal('a');
+    })
+
+    it('cleaner() - add custom cleaning method to this chain', function(){
+      create('asdf')
+        .cleaner('myCleaner', function(n){
+          return this._value.slice(n, -n);
+        })
+        .myCleaner(1).val().should.equal('sd');
+    })
+
+    it('cleaner() - add global custom cleaning method from chain', function(){
+      create()
+        .cleaner('myGlobalCleanerFromChain', function(n){
+          return this._value.slice(n);
+        }, true)
+      create('asdf').myGlobalCleanerFromChain(1).val().should.equal('sdf');
+    })
+
+    it('validator() - add custom validation method to this chain', function(){
+      create(1, good)
+        .validator('myValidator', function(value, msg){
+          if(this.val() !== value) return msg || 'myValidator: Oops!';
+        })
+        .myValidator(1).msg().should.equal(good);
+    })
+
+    it('validator() - add global custom validation method from this chain', function(){
+      create()
+        .validator('myGlobalValidatorFromChain', function(value, msg){
+          if(this.val()[0] !== value) return msg || 'myGlobalValidatorFromChain: Oops!';
+        }, true)
+      create('asdf', good).myGlobalValidatorFromChain('a').msg().should.equal(good);
+    })
+
+    it('msg() - get message (success or error)', function(){
+      create('', good).msg().should.equal(good);
+      create('').invalid(bad).msg().should.equal(bad);
+    })
+
+    it('err() - get error (if any)', function(){
+      create().err().should.equal('');
+      create().invalid(bad).err().should.equal(bad);
+    })
+
+    it('val() - get value', function(){
+      create(' a ').val().should.equal(' a ');
+      create(' a ').trim().val().should.equal('a');
+    })
+
+    it('raw() - get raw value', function(){
+      create(' a ').val().should.equal(' a ');
+      create(' a ').trim().raw().should.equal(' a ');
+    })
+
+    it('json() - get json object with raw(), val(), msg() and err()', function(){
+      var v = create(' a ', good).trim()
+        , o = v.json();
+      v.raw().should.equal(o.raw);
+      v.val().should.equal(o.val);
+      v.msg().should.equal(o.msg);
+      v.err().should.equal(o.err);
+    })
+
+    it('onError() - on error callback', function(){
+      var done = false;
+      create().onError(function(){
+        done = true;
+        this.err().should.equal(bad);
+      }).invalid(bad);
+      done.should.equal(true);
+    })
+
+    it('raise() - throw ValidationError if there is any error', function(){
+      var done = false;
+      try {
+        create().invalid(bad).raise();
+      } catch(e) {
+        done = true;
+        (e instanceof vchains.ValidationError).should.equal(true);
+      }
+      done.should.equal(true);
     })
 
   })
@@ -27,107 +152,115 @@ describe('Test suite for vchains validation library', function(){
   describe('Validators:', function(){
 
     it('invalid()', function(){
-      validate('123').invalid(bad).msg().should.equal(bad);
+      create('123').invalid(bad).msg().should.equal(bad);
     })
 
     it('is()', function(){
-      validate('asdfgh', good).is(/^asd/).msg().should.equal(good);
-      validate('qasdfgh').is(/^asd/, bad).msg().should.equal(bad);
+      create('asdfgh', good).is(/^asd/).msg().should.equal(good);
+      create('qasdfgh').is(/^asd/, bad).msg().should.equal(bad);
     })
 
     it('isNot()', function(){
-      validate('qasdfgh', good).isNot(/^asd/).msg().should.equal(good);
-      validate('asdfgh').isNot(/^asd/, bad).msg().should.equal(bad);
+      create('qasdfgh', good).isNot(/^asd/).msg().should.equal(good);
+      create('asdfgh').isNot(/^asd/, bad).msg().should.equal(bad);
     })
 
     it('isEmail()', function(){
-      validate('asd@qwe.ru', good).isEmail().msg().should.equal(good);
-      validate('asd').isEmail(bad).msg().should.equal(bad);
+      create('asd@qwe.ru', good).isEmail().msg().should.equal(good);
+      create('asd').isEmail(bad).msg().should.equal(bad);
     })
 
     it('isUrl()', function(){
-      validate('http://dot.net/dir/index.html?a=123&b=321', good).isUrl().msg().should.equal(good);
-      validate('asd').isUrl(bad).msg().should.equal(bad);
+      create('http://dot.net/dir/index.html?a=123&b=321', good).isUrl().msg().should.equal(good);
+      create('asd').isUrl(bad).msg().should.equal(bad);
     })
 
     it('isIp()', function(){
-      validate('127.0.0.1', good).isIp().msg().should.equal(good);
-      validate('365.1.1.1').isIp(bad).msg().should.equal(bad);
+      create('127.0.0.1', good).isIp().msg().should.equal(good);
+      create('365.1.1.1').isIp(bad).msg().should.equal(bad);
     })
 
     it('isNum()', function(){
-      validate('-0987654321', good).isNum().msg().should.equal(good);
-      validate('-').isNum(bad).msg().should.equal(bad);
+      create('-0987654321', good).isNum().msg().should.equal(good);
+      create('-').isNum(bad).msg().should.equal(bad);
     })
 
     it('isAlpha()', function(){
-      validate('Hello', good).isAlpha().msg().should.equal(good);
-      validate('asd1').isAlpha(bad).msg().should.equal(bad);
+      create('Hello', good).isAlpha().msg().should.equal(good);
+      create('asd1').isAlpha(bad).msg().should.equal(bad);
     })
 
     it('isAlphanum()', function(){
-      validate('Hello123', good).isAlphanum().msg().should.equal(good);
-      validate('Hello 123').isAlphanum(bad).msg().should.equal(bad);
+      create('Hello123', good).isAlphanum().msg().should.equal(good);
+      create('Hello 123').isAlphanum(bad).msg().should.equal(bad);
     })
 
     it('isInt()', function(){
-      validate('123', good).isInt().msg().should.equal(good);
-      validate('a123').isInt(bad).msg().should.equal(bad);
+      create('123', good).isInt().msg().should.equal(good);
+      create('a123').isInt(bad).msg().should.equal(bad);
     })
 
     it('isFloat()', function(){
-      validate('-123.123E+12', good).isFloat().msg().should.equal(good);
-      validate('a123').isFloat(bad).msg().should.equal(bad);
+      create('-123.123E+12', good).isFloat().msg().should.equal(good);
+      create('a123').isFloat(bad).msg().should.equal(bad);
     })
 
     it('isLt()', function(){
-      validate('123', good).isLt(124).msg().should.equal(good);
-      validate('123').isLt(122, bad).msg().should.equal(bad);
+      create('123', good).isLt(124).msg().should.equal(good);
+      create('123').isLt(122, bad).msg().should.equal(bad);
     })
 
     it('isLE()', function(){
-      validate('123', good).isLE(123).msg().should.equal(good);
-      validate('123').isLE(122, bad).msg().should.equal(bad);
+      create('123', good).isLE(123).msg().should.equal(good);
+      create('123').isLE(122, bad).msg().should.equal(bad);
     })
 
     it('isGt()', function(){
-      validate('123', good).isGt(122).msg().should.equal(good);
-      validate('123').isGt(124, bad).msg().should.equal(bad);
+      create('123', good).isGt(122).msg().should.equal(good);
+      create('123').isGt(124, bad).msg().should.equal(bad);
     })
 
     it('isGE()', function(){
-      validate('123', good).isGE(123).msg().should.equal(good);
-      validate('123').isGE(124, bad).msg().should.equal(bad);
+      create('123', good).isGE(123).msg().should.equal(good);
+      create('123').isGE(124, bad).msg().should.equal(bad);
     })
 
     it('isLen()', function(){
-      validate('123', good).isLen(0, 3).msg().should.equal(good);
-      validate('123').isLen(0, 2, bad).msg().should.equal(bad);
+      create('123', good).isLen(0, 3).msg().should.equal(good);
+      create('123').isLen(0, 2, bad).msg().should.equal(bad);
     })
 
     it('isEq()', function(){
-      validate('123', good).isEq(123).msg().should.equal(good);
-      validate('123').isEq(' 123', bad).msg().should.equal(bad);
+      create('123', good).isEq(123).msg().should.equal(good);
+      create('123').isEq(' 123', bad).msg().should.equal(bad);
     })
 
     it('isIn()', function(){
-      validate('a', good).isIn([ 'a', 'b', 'c' ]).msg().should.equal(good);
-      validate('z').isIn([ 'a', 'b', 'c' ], bad).msg().should.equal(bad);
+      create('a', good).isIn([ 'a', 'b', 'c' ]).msg().should.equal(good);
+      create('z').isIn([ 'a', 'b', 'c' ], bad).msg().should.equal(bad);
     })
 
     it('isNotIn()', function(){
-      validate('z', good).isNotIn([ 'a', 'b', 'c' ]).msg().should.equal(good);
-      validate('a').isNotIn([ 'a', 'b', 'c' ], bad).msg().should.equal(bad);
+      create('z', good).isNotIn([ 'a', 'b', 'c' ]).msg().should.equal(good);
+      create('a').isNotIn([ 'a', 'b', 'c' ], bad).msg().should.equal(bad);
     })
 
     it('isCard()', function(){
-      validate('4276-8010-1016-5090', good).isCard().msg().should.equal(good);
-      validate('1234-5678-9011-1213').isCard(bad).msg().should.equal(bad);
+      create('4276-8010-1016-5090', good).isCard().msg().should.equal(good);
+      create('1234-5678-9011-1213').isCard(bad).msg().should.equal(bad);
     })
 
   })
 
-  describe('Custom validators:', function(){
+  describe('Cleaners:', function(){
+
+    it('trim()', function(){
+      create(' a ').trim().val().should.equal('a');
+    })
+
+  })
+
+/*  describe('Custom validators:', function(){
 
     it('Add global custom validation method', function(){
       vchains.validator('test0', function(msg){
@@ -136,8 +269,8 @@ describe('Test suite for vchains validation library', function(){
     })
 
     it('Use this custom validation method', function(){
-      validate('').test0().msg().should.equal('');
-      validate(' ').test0().msg().should.equal('Error');
+      create('').test0().msg().should.equal('');
+      create(' ').test0().msg().should.equal('Error');
     })
 
     it('Add multiple global custom validation methods', function(){
@@ -152,12 +285,12 @@ describe('Test suite for vchains validation library', function(){
     })
 
     it('Use these custom validation methods', function(){
-      validate('1').test1().msg().should.equal('');
-      validate('1').test2().msg().should.equal('Error');
+      create('1').test1().msg().should.equal('');
+      create('1').test2().msg().should.equal('Error');
     })
 
     it('Add local custom validation method from chain', function(){
-      v = validate('333').validator('test3', function(msg){
+      v = create('333').validator('test3', function(msg){
         if(this.val().length != 3) return msg || 'Error';
       });
     })
@@ -167,15 +300,15 @@ describe('Test suite for vchains validation library', function(){
     })
 
     it('Add global custom validation method from chain', function(){
-      validate('4444').validator('test4', function(msg){
+      create('4444').validator('test4', function(msg){
         if(this.val().length != 4) return msg || 'Error';
       }, true);
     })
 
     it('Use this custom validation method', function(){
-      validate('4444').test4().msg().should.equal('');
+      create('4444').test4().msg().should.equal('');
     })
 
-  })
+  })*/
 
 });
